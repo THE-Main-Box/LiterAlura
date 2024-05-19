@@ -18,9 +18,16 @@ public class Writer {
     private int birthYear;
     private int deathYear;
 
-    @ManyToMany(mappedBy = "writersList", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @ManyToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     List<Book> booksList = new ArrayList<>();
 
+    @Override
+    public String toString() {
+        return"name='" + name + '\'' +
+                ", birthYear=" + birthYear +
+                ", deathYear=" + deathYear +
+                ", booksList=" + booksList;
+    }
 
     public Writer() {}
 
@@ -54,4 +61,7 @@ public class Writer {
         this.booksList = booksList;
     }
 
+    public void addBookList(Book book) {
+        this.booksList.add(book);
+    }
 }

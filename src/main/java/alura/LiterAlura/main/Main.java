@@ -4,6 +4,8 @@ import alura.LiterAlura.entity.Book;
 import alura.LiterAlura.entity.Writer;
 import alura.LiterAlura.model.ApiResponse;
 import alura.LiterAlura.model.BookRec;
+import alura.LiterAlura.repository.BookRepository;
+import alura.LiterAlura.service.BookService;
 import alura.LiterAlura.service.ConnectToGutendexApi;
 import alura.LiterAlura.service.ConvertToRec;
 import alura.LiterAlura.service.URLGenerator;
@@ -23,12 +25,11 @@ public class Main {
     private Writer writer;
     private Book book;
 
-//    private final BookService bookService;
-//
-//    public Main() {
-//        this.bookService = bookService;
-//    }
+    private final BookService bookService;
 
+    public Main(BookService bookService){
+        this.bookService = bookService;
+    }
 
     public void showMenu() {
         int choice = -1;
@@ -86,9 +87,14 @@ public class Main {
 
             this.book = new Book(bookRec);
             this.writer = new Writer(bookRec.authors().getFirst());
+
             this.book.addWriterList(writer);
+            this.writer.addBookList(book);
+
+            this.bookService.saveBook(this.book);
 
             this.showBookData();
+
 
         } catch (JsonProcessingException e) {
             throw new RuntimeException("Erro ao processar o json: " + e);
