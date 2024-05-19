@@ -2,6 +2,7 @@ package alura.LiterAlura;
 
 import alura.LiterAlura.main.Main;
 import alura.LiterAlura.repository.BookRepository;
+import alura.LiterAlura.repository.WriterRepository;
 import alura.LiterAlura.service.BookService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
@@ -17,6 +18,9 @@ public class LiterAluraApplication implements CommandLineRunner {
 
 	@Autowired
 	private BookRepository bookRepository;
+
+	@Autowired
+	private WriterRepository writerRepository;
 
 	@Autowired
 	private BookService service;

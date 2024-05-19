@@ -12,6 +12,7 @@ import alura.LiterAlura.service.URLGenerator;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
 import java.util.Scanner;
 
 @Component
@@ -41,7 +42,8 @@ public class Main {
                     2 - Listar livros registrados
                     3 - Listar autores registrados
                     4 - Listar autores vivos em um determinado ano
-                    5 - Listar em um determinado idioma
+                    5 - Listar livros em um determinado idioma
+                    
                     0 - SAIR
                     """);
             System.out.println("****************************************");
@@ -54,12 +56,16 @@ public class Main {
                     this.setBook();
                     break;
                 case 2:
+                    this.listRegistredBooks();
                     break;
                 case 3:
+                    this.listRegistredWriters();
                     break;
                 case 4:
+                    this.listAliveWriters();
                     break;
                 case 5:
+                    this.listBooksByLanguage();
                     break;
                 case 0:
                     System.out.println("saindo...");
@@ -72,7 +78,43 @@ public class Main {
         }
 
     }
-//Realiza uma pesquisa web com o nome de um livro e seta em variáveis globais o livro e seus escritores e os relaciona
+
+    private void listBooksByLanguage() {
+        System.out.println("Qual o indioma do livro em questão");
+        String userResponse = reader.nextLine();
+
+        List<Book> bookList = bookService.listBooksByLanguage(userResponse);
+
+        if(bookList.isEmpty()){
+            System.out.println("Não há nenhum livro com esta lingua");
+        }else{
+            bookList.forEach(this::showBookData);
+        }
+    }
+
+    private void listAliveWriters() {
+        System.out.println("Em que ano deseja ohar");
+        int userResponse = reader.nextInt();
+        reader.nextLine();
+
+        List<Writer> liveWriters = bookService.listWritersAliveInYear(userResponse);
+
+        if(liveWriters.isEmpty()){
+            System.out.println("Não existe nenhum escritor cadastrado vivo nessa época");
+        } else{
+            liveWriters.forEach(this::showWriterData);
+        }
+    }
+
+    private void listRegistredWriters() {
+        this.bookService.listWriters().forEach(this::showWriterData);
+    }
+
+    private void listRegistredBooks() {
+        this.bookService.listBooks().forEach(this::showBookData);
+    }
+
+    //Realiza uma pesquisa web com o nome de um livro e seta em variáveis globais o livro e seus escritores e os relaciona
     private void setBook() {
         System.out.println("Qual o titulo do livro");
         String userResponse = reader.nextLine();
@@ -83,8 +125,12 @@ public class Main {
 
         try {
             ApiResponse apiResponse = conversor.convert(json, ApiResponse.class);
-            BookRec bookRec = apiResponse.results().getFirst();
 
+            BookRec bookRec = null;
+            if(apiResponse != null) {
+                bookRec = apiResponse.results().getFirst();
+            }
+            assert bookRec != null;
             this.book = new Book(bookRec);
             this.writer = new Writer(bookRec.authors().getFirst());
 
@@ -93,7 +139,7 @@ public class Main {
 
             this.bookService.saveBook(this.book);
 
-            this.showBookData();
+            this.showBookData(this.book);
 
 
         } catch (JsonProcessingException e) {
@@ -101,13 +147,22 @@ public class Main {
         }
     }
 
-    private void showBookData() {
+    private void showWriterData(Writer writer){
+        System.out.println("Name..........:     "+writer.getName());
+        System.out.println("Ano/Nascimento:     "+writer.getBirthYear());
+        System.out.println("Ano/Morte.....:     "+writer.getDeathYear());
+        System.out.println("Livros........:     "+writer.getBooksList().stream().map(Book::getTitle).toList());
+        System.out.println();
+    }
+
+    private void showBookData(Book book) {
         System.out.println("Titulo........:     " + book.getTitle());
         System.out.println("Idioma........:     " + book.getLanguage());
         System.out.println("Escritores....:     [");
         book.getWritersList().forEach(w -> System.out.println(w.getName()));
         System.out.println("]");
         System.out.println("Total Download:     " + book.getSelledCopies());
+        System.out.println();
 
     }
 
